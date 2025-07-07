@@ -128,7 +128,8 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     setIsSubmitting(true);
     
     try {
-      // Set user context first
+      // Set user context for RLS
+      console.log('Setting user context for:', user.id);
       await supabase.rpc('set_user_context', { user_id_param: user.id });
 
       let mediaUrl = null;
@@ -136,6 +137,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
 
       // Upload media if present
       if (mediaFile) {
+        console.log('Uploading media...');
         mediaUrl = await uploadMedia(mediaFile, user.id);
         if (!mediaUrl) {
           throw new Error('Failed to upload media');
