@@ -33,10 +33,7 @@ export const authService = {
     if (data.user) {
       try {
         // Set user context first
-        await supabase.rpc('set_config', { 
-          setting_name: 'app.current_user_id', 
-          setting_value: data.user.id 
-        });
+        await supabase.rpc('set_user_context', { user_id_param: data.user.id });
 
         const { error: profileError } = await supabase.from('user_profiles').insert({
           user_id: data.user.id,
@@ -78,10 +75,7 @@ export const authService = {
 
       // Set the user context
       try {
-        await supabase.rpc('set_config', { 
-          setting_name: 'app.current_user_id', 
-          setting_value: user.id 
-        });
+        await supabase.rpc('set_user_context', { user_id_param: user.id });
       } catch (error) {
         console.error('Error setting user context:', error);
       }
@@ -115,10 +109,7 @@ export const authService = {
         if (session?.user) {
           // Set user context
           try {
-            await supabase.rpc('set_config', { 
-              setting_name: 'app.current_user_id', 
-              setting_value: session.user.id 
-            });
+            await supabase.rpc('set_user_context', { user_id_param: session.user.id });
           } catch (error) {
             console.error('Error setting user context:', error);
           }

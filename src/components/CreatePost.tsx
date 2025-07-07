@@ -128,6 +128,9 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     setIsSubmitting(true);
     
     try {
+      // Set user context first
+      await supabase.rpc('set_user_context', { user_id_param: user.id });
+
       let mediaUrl = null;
       let postType = 'text';
 

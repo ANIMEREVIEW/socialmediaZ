@@ -54,10 +54,7 @@ const Admin = () => {
     setIsLoading(true);
     try {
       // Set user context for RLS
-      await supabase.rpc('set_config', { 
-        setting_name: 'app.current_user_id', 
-        setting_value: user.id 
-      });
+      await supabase.rpc('set_user_context', { user_id_param: user.id });
 
       const { data, error } = await supabase
         .from('posts')
@@ -94,10 +91,7 @@ const Admin = () => {
   const updatePostStatus = async (postId: string, status: 'approved' | 'rejected') => {
     try {
       // Set user context for RLS
-      await supabase.rpc('set_config', { 
-        setting_name: 'app.current_user_id', 
-        setting_value: user?.id || '' 
-      });
+      await supabase.rpc('set_user_context', { user_id_param: user?.id || '' });
 
       const { error } = await supabase
         .from('posts')
@@ -121,10 +115,7 @@ const Admin = () => {
   const deletePost = async (postId: string) => {
     try {
       // Set user context for RLS
-      await supabase.rpc('set_config', { 
-        setting_name: 'app.current_user_id', 
-        setting_value: user?.id || '' 
-      });
+      await supabase.rpc('set_user_context', { user_id_param: user?.id || '' });
 
       const { error } = await supabase
         .from('posts')

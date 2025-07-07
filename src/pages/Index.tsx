@@ -54,10 +54,7 @@ const Index = () => {
       let postsData: PostWithEngagement[] = [];
 
       // Set user context for RLS
-      await supabase.rpc('set_config', { 
-        setting_name: 'app.current_user_id', 
-        setting_value: user.id 
-      });
+      await supabase.rpc('set_user_context', { user_id_param: user.id });
 
       switch (activeTab) {
         case 'trending':

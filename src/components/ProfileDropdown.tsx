@@ -84,6 +84,9 @@ export const ProfileDropdown = ({ onSignOut }: ProfileDropdownProps) => {
 
     setIsUpdating(true);
     try {
+      // Set user context
+      await supabase.rpc('set_user_context', { user_id_param: user.id });
+
       let avatarUrl = user.profile?.avatar_url;
 
       if (avatarFile) {
@@ -147,54 +150,22 @@ export const ProfileDropdown = ({ onSignOut }: ProfileDropdownProps) => {
     try {
       console.log('Redeeming admin code:', adminCode.trim());
 
-      // Check if the admin code exists and is not used
-      const { data: adminKey, error: checkError } = await supabase
-        .from('admin_keys')
-        .select('*')
-        .eq('key_code', adminCode.trim())
-        .eq('is_used', false)
-        .maybeSingle();
+      // Use the new redeem function
+      const { data: success, error } = await supabase.rpc('redeem_admin_key', {
+        key_code_param: adminCode.trim(),
+        user_id_param: user.id
+      });
 
-      if (checkError) {
-        console.error('Error checking admin key:', checkError);
-        throw new Error('Failed to validate admin code');
+      if (error) {
+        console.error('Error redeeming admin key:', error);
+        throw new Error('Failed to redeem admin code');
       }
 
-      if (!adminKey) {
+      if (!success) {
         throw new Error('Invalid or already used admin code');
       }
 
-      console.log('Admin key found:', adminKey);
-
-      // Mark the admin key as used
-      const { error: updateKeyError } = await supabase
-        .from('admin_keys')
-        .update({
-          is_used: true,
-          used_at: new Date().toISOString(),
-          used_by: user.id
-        })
-        .eq('id', adminKey.id);
-
-      if (updateKeyError) {
-        console.error('Error updating admin key:', updateKeyError);
-        throw new Error('Failed to update admin key');
-      }
-
-      // Update user profile to admin
-      const { data: updatedProfile, error: updateProfileError } = await supabase
-        .from('user_profiles')
-        .update({ is_admin: true })
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (updateProfileError) {
-        console.error('Error updating user profile:', updateProfileError);
-        throw new Error('Failed to grant admin access');
-      }
-
-      console.log('Admin access granted:', updatedProfile);
+      console.log('Admin access granted successfully');
 
       toast({ title: "Success", description: "Admin access granted successfully!" });
       setAdminCode('');
