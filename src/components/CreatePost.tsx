@@ -128,9 +128,12 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     setIsSubmitting(true);
     
     try {
-      // Set user context for RLS
-      console.log('Setting user context for:', user.id);
+      // Set user context FIRST - this is critical for RLS
+      console.log('Setting user context for user:', user.id);
       await supabase.rpc('set_user_context', { user_id_param: user.id });
+      
+      // Small delay to ensure context is set
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       let mediaUrl = null;
       let postType = 'text';
@@ -147,9 +150,9 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
         postType = 'link';
       }
 
-      // Create post data
+      // Create post data with explicit user context
       const postData = {
-        user_id: user.id,
+        user_id: user.id, // Explicit user ID
         username: user.profile?.username || 'Anonymous',
         user_avatar: user.profile?.avatar_url || '',
         content: content.trim(),
@@ -160,11 +163,14 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
         anime_id: selectedAnime?.mal_id?.toString() || null,
         anime_title: selectedAnime?.title || null,
         anime_image: selectedAnime?.images?.jpg?.image_url || null,
-        status: 'pending' as 'pending'
+        status: 'pending' as 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       console.log('Creating post with data:', postData);
 
+      // Insert the post
       const { data, error } = await supabase
         .from('posts')
         .insert(postData)

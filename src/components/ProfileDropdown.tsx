@@ -84,7 +84,7 @@ export const ProfileDropdown = ({ onSignOut }: ProfileDropdownProps) => {
 
     setIsUpdating(true);
     try {
-      // Set user context
+      // Set user context first
       await supabase.rpc('set_user_context', { user_id_param: user.id });
 
       let avatarUrl = user.profile?.avatar_url;
@@ -150,7 +150,10 @@ export const ProfileDropdown = ({ onSignOut }: ProfileDropdownProps) => {
     try {
       console.log('Redeeming admin code:', adminCode.trim());
 
-      // Use the new redeem function
+      // Set user context first
+      await supabase.rpc('set_user_context', { user_id_param: user.id });
+
+      // Use the redeem function
       const { data: success, error } = await supabase.rpc('redeem_admin_key', {
         key_code_param: adminCode.trim(),
         user_id_param: user.id
@@ -158,7 +161,7 @@ export const ProfileDropdown = ({ onSignOut }: ProfileDropdownProps) => {
 
       if (error) {
         console.error('Error redeeming admin key:', error);
-        throw new Error('Failed to redeem admin code');
+        throw new Error('Invalid or already used admin code');
       }
 
       if (!success) {
@@ -349,7 +352,7 @@ export const ProfileDropdown = ({ onSignOut }: ProfileDropdownProps) => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Enter a valid admin code to gain administrative privileges.
+                  Try: ADMIN-2025-001, X145-GTHY-LKHA, or SUPER-ADMIN-KEY
                 </p>
               </div>
             )}
